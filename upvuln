@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# ✨ System Update, Upgrade, and Cleanup Script ✨
+
+# 🛠️ Check if the script is run as root
+if [[ $EUID -ne 0 ]]; then
+    echo "🚫 Error: This script must be run as root. Use sudo!"
+    exit 1
+fi
+
+echo "🚀 Starting system update, upgrade, and cleanup process..."
+
+# 🔄 Update package lists
+echo "🔄 Updating package lists..."
+if apt update; then
+    echo "✅ Package lists updated successfully."
+else
+    echo "❌ Failed to update package lists."
+    exit 1
+fi
+
+# ⬆️ Upgrade installed packages
+echo "⬆️ Upgrading installed packages..."
+if apt upgrade -y; then
+    echo "✅ Packages upgraded successfully."
+else
+    echo "❌ Failed to upgrade packages."
+    exit 1
+fi
+
+# 🗑️ Remove unnecessary packages and clean cache
+echo "🗑️ Removing unnecessary packages and cleaning cache..."
+if apt autoremove -y && apt autoclean; then
+    echo "✅ Unnecessary packages removed and cache cleaned."
+else
+    echo "❌ Failed to clean up unnecessary packages."
+    exit 1
+fi
+
+# 🔍 Fix broken dependencies and configure pending packages
+echo "🔍 Fixing broken dependencies and configuring pending packages..."
+if dpkg --configure -a && apt install -f -y; then
+    echo "✅ No issues detected in the system."
+else
+    echo "⚠️ There might be issues that require manual resolution."
+fi
+
+# 📦 Move the script itself (upvuln) to /usr/local/bin/
+echo "📦 Moving upvuln to /usr/local/bin/..."
+if mv "$0" /usr/local/bin/upvuln; then
+    echo "✅ upvuln moved to /usr/local/bin/ successfully."
+else
+    echo "❌ Failed to move upvuln to /usr/local/bin/."
+    exit 1
+fi
+
+echo "🎉 All operations completed successfully!"
