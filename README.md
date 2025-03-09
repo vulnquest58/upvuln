@@ -78,38 +78,6 @@ This project is licensed under the **MIT License** . See the [LICENSE](https://c
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! If you have any suggestions, bug reports, or feature requests, feel free to open an issue or submit a pull request.
-
-20. Fork the repository:
-    
-```
-https://github.com/vulnquest58/upvuln
-```
-    
-21. Create a new branch:
-    
-```
-   git checkout -b feature/YourFeatureName
-```
-    
-22. Commit your changes:
-    
-```
- git commit -m "Add some feature"
-```
-    
-23. Push to the branch:
-    
-```
- git push origin feature/YourFeatureName
-```
-    
-24. Open a pull request on GitHub.
-
----
-
 ## ⭐ Support
 
 If you find this script useful, please give it a star! Your support helps encourage further development and maintenance.
