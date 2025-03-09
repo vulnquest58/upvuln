@@ -1,57 +1,121 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # ✨ System Update, Upgrade, and Cleanup Script ✨
 
+# Define Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+PURPLE='\033[0;35m'
+NC='\033[0m' # No Color
+
 # 🛠️ Check if the script is run as root
 if [[ $EUID -ne 0 ]]; then
-    echo "🚫 Error: This script must be run as root. Use sudo!"
+    echo -e "${RED}🚫 Error: This script must be run as root. Use sudo!${NC}"
     exit 1
 fi
 
-echo "🚀 Starting system update, upgrade, and cleanup process..."
+echo -e "${PURPLE}🚀 Starting system update, upgrade, and cleanup process...${NC}"
 
-# 🔄 Update package lists
-echo "🔄 Updating package lists..."
-if apt update; then
-    echo "✅ Package lists updated successfully."
-else
-    echo "❌ Failed to update package lists."
-    exit 1
-fi
+# -------------------------
+# Region --- Updates
+# -------------------------
+echo -e "${PURPLE}RUNNING: sudo apt update --fix-missing${NC}"
 
-# ⬆️ Upgrade installed packages
-echo "⬆️ Upgrading installed packages..."
-if apt upgrade -y; then
-    echo "✅ Packages upgraded successfully."
-else
-    echo "❌ Failed to upgrade packages."
-    exit 1
-fi
+for i in {1..100}; do  
+    sudo apt clean
+    sudo apt update --fix-missing
+    status=$?
+    if test $status -eq 0; then 
+        echo -e "${GREEN}SUCCESS: sudo apt update --fix-missing${NC}\n"
+        break
+    else 
+        echo -e "${RED}FAILED: sudo apt update --fix-missing (Attempt $i/100)${NC}\n"
+        sleep 1m
+    fi
+done
 
-# 🗑️ Remove unnecessary packages and clean cache
-echo "🗑️ Removing unnecessary packages and cleaning cache..."
-if apt autoremove -y && apt autoclean; then
-    echo "✅ Unnecessary packages removed and cache cleaned."
-else
-    echo "❌ Failed to clean up unnecessary packages."
-    exit 1
-fi
+# -------------------------
+# Region --- Upgrades
+# -------------------------
+echo -e "${PURPLE}RUNNING: sudo apt upgrade -y${NC}"
 
-# 🔍 Fix broken dependencies and configure pending packages
-echo "🔍 Fixing broken dependencies and configuring pending packages..."
-if dpkg --configure -a && apt install -f -y; then
-    echo "✅ No issues detected in the system."
-else
-    echo "⚠️ There might be issues that require manual resolution."
-fi
+for i in {1..100}; do  
+    sudo apt full-upgrade -y
+    status=$?
+    if test $status -eq 0; then 
+        echo -e "${GREEN}SUCCESS: sudo apt upgrade -y${NC}\n"
+        break
+    else 
+        echo -e "${RED}FAILED: sudo apt upgrade -y (Attempt $i/100)${NC}\n"
+        sleep 1m
+    fi
+done
 
-# 📦 Move the script itself (upvuln) to /usr/local/bin/
-echo "📦 Moving upvuln to /usr/local/bin/..."
+# -------------------------
+# Region --- Autoremove
+# -------------------------
+echo -e "${PURPLE}RUNNING: sudo apt autoremove -y${NC}"
+
+for i in {1..100}; do  
+    sudo apt autoremove -y
+    status=$?
+    if test $status -eq 0; then 
+        echo -e "${GREEN}SUCCESS: sudo apt autoremove -y${NC}\n"
+        break
+    else 
+        echo -e "${RED}FAILED: sudo apt autoremove -y (Attempt $i/100)${NC}\n"
+        sleep 1m
+    fi
+done
+
+# -------------------------
+# Region --- Cleanup
+# -------------------------
+echo -e "${PURPLE}RUNNING: sudo apt autoclean${NC}"
+
+for i in {1..100}; do  
+    sudo apt autoclean
+    status=$?
+    if test $status -eq 0; then 
+        echo -e "${GREEN}SUCCESS: sudo apt autoclean${NC}\n"
+        break
+    else 
+        echo -e "${RED}FAILED: sudo apt autoclean (Attempt $i/100)${NC}\n"
+        sleep 1m
+    fi
+done
+
+# -------------------------
+# Region --- Dependency Fixes
+# -------------------------
+echo -e "${PURPLE}RUNNING: Fixing broken dependencies and configuring pending packages${NC}"
+
+for i in {1..100}; do  
+    dpkg --configure -a && apt install -f -y
+    status=$?
+    if test $status -eq 0; then 
+        echo -e "${GREEN}SUCCESS: Fixed broken dependencies and configured pending packages${NC}\n"
+        break
+    else 
+        echo -e "${RED}FAILED: Fixing broken dependencies (Attempt $i/100)${NC}\n"
+        sleep 1m
+    fi
+done
+
+# -------------------------
+# Region --- Self-Move
+# -------------------------
+echo -e "${PURPLE}📦 Moving upvuln to /usr/local/bin/...${NC}"
+
 if mv "$0" /usr/local/bin/upvuln; then
-    echo "✅ upvuln moved to /usr/local/bin/ successfully."
+    echo -e "${GREEN}✅ upvuln moved to /usr/local/bin/ successfully.${NC}"
 else
-    echo "❌ Failed to move upvuln to /usr/local/bin/."
+    echo -e "${RED}❌ Failed to move upvuln to /usr/local/bin/.${NC}"
     exit 1
 fi
 
-echo "🎉 All operations completed successfully!"
+# -------------------------
+# Region --- Exiting
+# -------------------------
+echo -e "${PURPLE}Exiting BasherUpdate...${NC}\n"
+exit 0
