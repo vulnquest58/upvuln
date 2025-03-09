@@ -64,6 +64,7 @@ Simply run the script with root privileges:
 ```
 sudo upvuln
 ```
+![upvuln](https://github.com/user-attachments/assets/ab5edf14-abcb-4398-81a9-0a6f4af7ec7a)
 
 The script will:
 
