@@ -5,6 +5,7 @@
 # Define Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+PURPLE='\033[0;35m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
@@ -108,11 +109,17 @@ fi
 # Region --- Self-Move
 # -------------------------
 echo -e "${PURPLE}📦 Moving upvuln to /usr/local/bin/...${NC}"
-if mv "$0" /usr/local/bin/upvuln; then
-    echo -e "${GREEN}✅ SUCCESS: upvuln moved to /usr/local/bin/ successfully.${NC}"
+
+# Check if the script already exists in /usr/local/bin/
+if [[ -f "/usr/local/bin/upvuln" ]]; then
+    echo -e "${YELLOW}ℹ️ INFO: upvuln already exists in /usr/local/bin/. Skipping move.${NC}"
 else
-    echo -e "${RED}❌ FAILED: Failed to move upvuln to /usr/local/bin/.${NC}"
-    exit 1
+    if mv "$0" /usr/local/bin/upvuln; then
+        echo -e "${GREEN}✅ SUCCESS: upvuln moved to /usr/local/bin/ successfully.${NC}"
+    else
+        echo -e "${RED}❌ FAILED: Failed to move upvuln to /usr/local/bin/.${NC}"
+        exit 1
+    fi
 fi
 
 # -------------------------
