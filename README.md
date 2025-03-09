@@ -2,18 +2,21 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/vulnquest58/upvuln/blob/main/LICENSE)
 
-`upvuln` is a lightweight, professional Bash script designed to automate system updates, upgrades, and cleanup tasks on Linux-based systems. It ensures your system stays up-to-date, removes unnecessary packages, and fixes potential issues—all with a single command.
+`upvuln` is a robust Bash script designed to automate system updates, upgrades, and cleanup tasks on Linux-based systems. With advanced features like **retry logic** , **color-coded output** , and **dependency fixes** , it ensures your system stays secure, clean, and up-to-date with minimal effort.
 
 ---
 
 ## 📋 Features
 
-- **System Updates** : Automatically updates package lists (`apt update`).
-- **Package Upgrades** : Upgrades all installed packages (`apt upgrade`).
-- **Cleanup** : Removes unused packages and cleans cached files (`apt autoremove` and `apt autoclean`).
-- **Dependency Fixes** : Configures pending packages and fixes broken dependencies.
+- **System Updates** : Automatically updates package lists (`apt update --fix-missing`) with retry logic for resilience.
+- **Package Upgrades** : Upgrades all installed packages (`apt full-upgrade -y`) with retry logic to handle intermittent failures.
+- **Cleanup** :
+    - Removes unused packages (`apt autoremove -y`).
+    - Cleans cached package files (`apt autoclean`).
+- **Dependency Fixes** : Configures pending packages and fixes broken dependencies using `dpkg --configure -a` and `apt install -f`.
+- **Retry Logic** : Retries failed operations up to 100 times with a 1-minute delay between attempts.
+- **Color-Coded Output** : Provides clear, visually distinct messages for success (`GREEN`), failure (`RED`), and informational updates (`PURPLE`).
 - **Self-Installation** : Moves itself to `/usr/local/bin/` for global accessibility after execution.
-- **Error Handling** : Includes robust error handling to ensure smooth operation.
 
 ---
 
@@ -27,28 +30,28 @@
 
 ## 📥 Installation
 
-11. **Download the Script** : Clone the repository or download the `upvuln` script directly:
+1. **Download the Script** : Clone the repository or download the `upvuln` script directly:
     
 ```
-  wget https://raw.githubusercontent.com/vulnquest58/upvuln/main/upvuln
+ wget https://raw.githubusercontent.com/vulnquest58/upvuln/main/upvuln
 ```
     
-12. **Make the Script Executable** : Give the script executable permissions:
+2. **Make the Script Executable** : Give the script executable permissions:
     
 ```
-chmod +x upvuln
+  chmod +x upvuln
 ```
     
-13. **Run the Script** : Execute the script with root privileges:
+3. **Run the Script** : Execute the script with root privileges:
     
 ```
-sudo ./upvuln
+  sudo ./upvuln
 ```
     
-14. **Global Accessibility** : After the first run, the script will move itself to `/usr/local/bin/`. You can now run it globally:
+4. **Global Accessibility** : After the first run, the script will move itself to `/usr/local/bin/`. You can now run it globally:
     
 ```
-sudo upvuln
+ sudo upvuln
 ```
     
 
@@ -64,12 +67,37 @@ sudo upvuln
 
 The script will:
 
-15. Update package lists.
-16. Upgrade installed packages.
-17. Clean up unnecessary files.
-18. Fix broken dependencies.
-19. Move itself to `/usr/local/bin/` for global access.
+1. Update package lists with retry logic (`apt update --fix-missing`).
+2. Upgrade installed packages with retry logic (`apt full-upgrade -y`).
+3. Remove unused packages (`apt autoremove -y`).
+4. Clean cached package files (`apt autoclean`).
+5. Fix broken dependencies and configure pending packages.
+6. Move itself to `/usr/local/bin/` for global access.
 
+---
+
+## 🔧 Advanced Features
+
+### Retry Logic
+
+If an operation fails (e.g., due to network issues or temporary errors), the script will retry up to **100 times** with a **1-minute delay** between attempts. This ensures resilience and minimizes manual intervention.
+
+### Color-Coded Output
+
+The script uses color-coded messages for better readability:
+
+- **Purple** : Informational messages (e.g., "RUNNING: ...").
+- **Green** : Success messages (e.g., "SUCCESS: ...").
+- **Red** : Failure messages (e.g., "FAILED: ...").
+
+Example:
+
+```
+RUNNING: sudo apt update --fix-missing
+
+SUCCESS: sudo apt update --fix-missing
+
+```
 ---
 
 ## 📜 License
@@ -77,13 +105,11 @@ The script will:
 This project is licensed under the **MIT License** . See the [LICENSE](https://chat.qwen.ai/c/LICENSE) file for details.
 
 ---
-
 ## ⭐ Support
 
 If you find this script useful, please give it a star! Your support helps encourage further development and maintenance.
 
 ---
-
 ## 📞 Contact
 
 For questions or feedback, feel free to reach out:
