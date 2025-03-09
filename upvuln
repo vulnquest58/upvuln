@@ -5,8 +5,25 @@
 # Define Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-PURPLE='\033[0;35m'
+YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
+
+# Function to display a progress bar
+progress_bar() {
+    local duration=$1
+    local width=50 # Width of the progress bar
+    for ((i = 0; i <= 100; i++)); do
+        sleep "$duration"
+        # Calculate the number of filled and empty blocks
+        filled=$((i * width / 100))
+        empty=$((width - filled))
+        # Create the progress bar string
+        bar=$(printf "%-${filled}s" | tr ' ' '█')$(printf "%-${empty}s")
+        # Print the progress bar with percentage
+        printf "\r${GREEN}Progress: [%3d%%]${NC} [${YELLOW}%s${NC}]" $i "$bar"
+    done
+    echo ""
+}
 
 # 🛠️ Check if the script is run as root
 if [[ $EUID -ne 0 ]]; then
@@ -19,98 +36,82 @@ echo -e "${PURPLE}🚀 Starting system update, upgrade, and cleanup process...${
 # -------------------------
 # Region --- Updates
 # -------------------------
-echo -e "${PURPLE}RUNNING: sudo apt update --fix-missing${NC}"
-
-for i in {1..100}; do  
-    sudo apt clean
-    sudo apt update --fix-missing
-    status=$?
-    if test $status -eq 0; then 
-        echo -e "${GREEN}SUCCESS: sudo apt update --fix-missing${NC}\n"
-        break
-    else 
-        echo -e "${RED}FAILED: sudo apt update --fix-missing (Attempt $i/100)${NC}\n"
-        sleep 1m
-    fi
-done
+echo -e "${PURPLE}RUNNING: Updating package lists...${NC}"
+sudo apt clean
+sudo apt update --fix-missing &
+progress_bar 0.1 # Adjust the duration for the progress bar
+wait $!
+if [[ $? -eq 0 ]]; then
+    echo -e "\n${GREEN}✅ SUCCESS: Package lists updated successfully.${NC}\n"
+else
+    echo -e "\n${RED}❌ FAILED: Failed to update package lists.${NC}\n"
+    exit 1
+fi
 
 # -------------------------
 # Region --- Upgrades
 # -------------------------
-echo -e "${PURPLE}RUNNING: sudo apt upgrade -y${NC}"
-
-for i in {1..100}; do  
-    sudo apt full-upgrade -y
-    status=$?
-    if test $status -eq 0; then 
-        echo -e "${GREEN}SUCCESS: sudo apt upgrade -y${NC}\n"
-        break
-    else 
-        echo -e "${RED}FAILED: sudo apt upgrade -y (Attempt $i/100)${NC}\n"
-        sleep 1m
-    fi
-done
+echo -e "${PURPLE}RUNNING: Upgrading installed packages...${NC}"
+sudo apt full-upgrade -y &
+progress_bar 0.1 # Adjust the duration for the progress bar
+wait $!
+if [[ $? -eq 0 ]]; then
+    echo -e "\n${GREEN}✅ SUCCESS: Installed packages upgraded successfully.${NC}\n"
+else
+    echo -e "\n${RED}❌ FAILED: Failed to upgrade installed packages.${NC}\n"
+    exit 1
+fi
 
 # -------------------------
 # Region --- Autoremove
 # -------------------------
-echo -e "${PURPLE}RUNNING: sudo apt autoremove -y${NC}"
-
-for i in {1..100}; do  
-    sudo apt autoremove -y
-    status=$?
-    if test $status -eq 0; then 
-        echo -e "${GREEN}SUCCESS: sudo apt autoremove -y${NC}\n"
-        break
-    else 
-        echo -e "${RED}FAILED: sudo apt autoremove -y (Attempt $i/100)${NC}\n"
-        sleep 1m
-    fi
-done
+echo -e "${PURPLE}RUNNING: Removing unused packages...${NC}"
+sudo apt autoremove -y &
+progress_bar 0.1 # Adjust the duration for the progress bar
+wait $!
+if [[ $? -eq 0 ]]; then
+    echo -e "\n${GREEN}✅ SUCCESS: Unused packages removed successfully.${NC}\n"
+else
+    echo -e "\n${RED}❌ FAILED: Failed to remove unused packages.${NC}\n"
+    exit 1
+fi
 
 # -------------------------
 # Region --- Cleanup
 # -------------------------
-echo -e "${PURPLE}RUNNING: sudo apt autoclean${NC}"
-
-for i in {1..100}; do  
-    sudo apt autoclean
-    status=$?
-    if test $status -eq 0; then 
-        echo -e "${GREEN}SUCCESS: sudo apt autoclean${NC}\n"
-        break
-    else 
-        echo -e "${RED}FAILED: sudo apt autoclean (Attempt $i/100)${NC}\n"
-        sleep 1m
-    fi
-done
+echo -e "${PURPLE}RUNNING: Cleaning cached package files...${NC}"
+sudo apt autoclean &
+progress_bar 0.1 # Adjust the duration for the progress bar
+wait $!
+if [[ $? -eq 0 ]]; then
+    echo -e "\n${GREEN}✅ SUCCESS: Cached package files cleaned successfully.${NC}\n"
+else
+    echo -e "\n${RED}❌ FAILED: Failed to clean cached package files.${NC}\n"
+    exit 1
+fi
 
 # -------------------------
 # Region --- Dependency Fixes
 # -------------------------
-echo -e "${PURPLE}RUNNING: Fixing broken dependencies and configuring pending packages${NC}"
-
-for i in {1..100}; do  
-    dpkg --configure -a && apt install -f -y
-    status=$?
-    if test $status -eq 0; then 
-        echo -e "${GREEN}SUCCESS: Fixed broken dependencies and configured pending packages${NC}\n"
-        break
-    else 
-        echo -e "${RED}FAILED: Fixing broken dependencies (Attempt $i/100)${NC}\n"
-        sleep 1m
-    fi
-done
+echo -e "${PURPLE}RUNNING: Fixing broken dependencies...${NC}"
+dpkg --configure -a && apt install -f -y &
+progress_bar 0.1 # Adjust the duration for the progress bar
+wait $!
+if [[ $? -eq 0 ]]; then
+    echo -e "\n${GREEN}✅ SUCCESS: Broken dependencies fixed successfully.${NC}\n"
+else
+    echo -e "\n${RED}❌ FAILED: Failed to fix broken dependencies.${NC}\n"
+    exit 1
+fi
 
 # -------------------------
 # Region --- Self-Move
 # -------------------------
 echo -e "${PURPLE}📦 Moving upvuln to /usr/local/bin/...${NC}"
-
 if mv "$0" /usr/local/bin/upvuln; then
-    echo -e "${GREEN}✅ upvuln moved to /usr/local/bin/ successfully.${NC}"
+    echo -e "${GREEN}✅ SUCCESS: upvuln moved to /usr/local/bin/ successfully.${NC}"
 else
-    echo -e "${RED}❌ Failed to move upvuln to /usr/local/bin/.${NC}"
+    echo -e "${RED}❌ FAILED: Failed to move upvuln to /usr/local/bin/.${NC}"
     exit 1
 fi
 
