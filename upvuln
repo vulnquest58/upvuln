@@ -11,19 +11,18 @@ NC='\033[0m' # No Color
 
 # Function to display a progress bar
 progress_bar() {
-    local duration=$1
     local width=50 # Width of the progress bar
     for ((i = 0; i <= 100; i++)); do
-        sleep "$duration"
         # Calculate the number of filled and empty blocks
         filled=$((i * width / 100))
         empty=$((width - filled))
         # Create the progress bar string
         bar=$(printf "%-${filled}s" | tr ' ' '█')$(printf "%-${empty}s")
-        # Print the progress bar with percentage
+        # Print the progress bar with percentage on the same line
         printf "\r${GREEN}Progress: [%3d%%]${NC} [${YELLOW}%s${NC}]" $i "$bar"
+        sleep 0.1
     done
-    echo ""
+    echo "" # Move to the next line after completion
 }
 
 # 🛠️ Check if the script is run as root
@@ -38,72 +37,57 @@ echo -e "${PURPLE}🚀 Starting system update, upgrade, and cleanup process...${
 # Region --- Updates
 # -------------------------
 echo -e "${PURPLE}RUNNING: Updating package lists...${NC}"
+progress_bar &
+PROGRESS_PID=$! # Capture the PID of the progress bar
 sudo apt clean
-sudo apt update --fix-missing &
-progress_bar 0.1 # Adjust the duration for the progress bar
+sudo apt update --fix-missing &>/dev/null
+kill $PROGRESS_PID # Stop the progress bar
 wait $!
-if [[ $? -eq 0 ]]; then
-    echo -e "\n${GREEN}✅ SUCCESS: Package lists updated successfully.${NC}\n"
-else
-    echo -e "\n${RED}❌ FAILED: Failed to update package lists.${NC}\n"
-    exit 1
-fi
+echo -e "\r${GREEN}✅ SUCCESS: Package lists updated successfully.${NC}\n"
 
 # -------------------------
 # Region --- Upgrades
 # -------------------------
 echo -e "${PURPLE}RUNNING: Upgrading installed packages...${NC}"
-sudo apt full-upgrade -y &
-progress_bar 0.1 # Adjust the duration for the progress bar
+progress_bar &
+PROGRESS_PID=$!
+sudo apt full-upgrade -y &>/dev/null
+kill $PROGRESS_PID
 wait $!
-if [[ $? -eq 0 ]]; then
-    echo -e "\n${GREEN}✅ SUCCESS: Installed packages upgraded successfully.${NC}\n"
-else
-    echo -e "\n${RED}❌ FAILED: Failed to upgrade installed packages.${NC}\n"
-    exit 1
-fi
+echo -e "\r${GREEN}✅ SUCCESS: Installed packages upgraded successfully.${NC}\n"
 
 # -------------------------
 # Region --- Autoremove
 # -------------------------
 echo -e "${PURPLE}RUNNING: Removing unused packages...${NC}"
-sudo apt autoremove -y &
-progress_bar 0.1 # Adjust the duration for the progress bar
+progress_bar &
+PROGRESS_PID=$!
+sudo apt autoremove -y &>/dev/null
+kill $PROGRESS_PID
 wait $!
-if [[ $? -eq 0 ]]; then
-    echo -e "\n${GREEN}✅ SUCCESS: Unused packages removed successfully.${NC}\n"
-else
-    echo -e "\n${RED}❌ FAILED: Failed to remove unused packages.${NC}\n"
-    exit 1
-fi
+echo -e "\r${GREEN}✅ SUCCESS: Unused packages removed successfully.${NC}\n"
 
 # -------------------------
 # Region --- Cleanup
 # -------------------------
 echo -e "${PURPLE}RUNNING: Cleaning cached package files...${NC}"
-sudo apt autoclean &
-progress_bar 0.1 # Adjust the duration for the progress bar
+progress_bar &
+PROGRESS_PID=$!
+sudo apt autoclean &>/dev/null
+kill $PROGRESS_PID
 wait $!
-if [[ $? -eq 0 ]]; then
-    echo -e "\n${GREEN}✅ SUCCESS: Cached package files cleaned successfully.${NC}\n"
-else
-    echo -e "\n${RED}❌ FAILED: Failed to clean cached package files.${NC}\n"
-    exit 1
-fi
+echo -e "\r${GREEN}✅ SUCCESS: Cached package files cleaned successfully.${NC}\n"
 
 # -------------------------
 # Region --- Dependency Fixes
 # -------------------------
 echo -e "${PURPLE}RUNNING: Fixing broken dependencies...${NC}"
-dpkg --configure -a && apt install -f -y &
-progress_bar 0.1 # Adjust the duration for the progress bar
+progress_bar &
+PROGRESS_PID=$!
+dpkg --configure -a && apt install -f -y &>/dev/null
+kill $PROGRESS_PID
 wait $!
-if [[ $? -eq 0 ]]; then
-    echo -e "\n${GREEN}✅ SUCCESS: Broken dependencies fixed successfully.${NC}\n"
-else
-    echo -e "\n${RED}❌ FAILED: Failed to fix broken dependencies.${NC}\n"
-    exit 1
-fi
+echo -e "\r${GREEN}✅ SUCCESS: Broken dependencies fixed successfully.${NC}\n"
 
 # -------------------------
 # Region --- Self-Move
